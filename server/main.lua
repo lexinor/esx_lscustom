@@ -19,28 +19,29 @@ RegisterNetEvent('esx_lscustom:stopModing', function(plate)
 end)
 
 AddEventHandler('esx:playerDropped', function(src)
-	src = tostring(src)
-	local playersCount = #ESX.GetExtendedPlayers()
-	if Customs[src] then
-		for k,v in pairs(Customs[src]) do
-			local entity = NetworkGetEntityFromNetworkId(v.netId)
-			if DoesEntityExist(entity) then
-				if playersCount > 0 then
-					TriggerClientEvent('esx_lscustom:restoreMods', -1, v.netId, v.props)
-				else
-					DeleteEntity(entity)
-				end
-			end
-		end
-		Customs[src] = nil
-	end
+    src = tostring(src)
+	local playersCount = #GetPlayers()
+    if Customs[src] then
+        for k, v in pairs(Customs[src]) do
+            local entity = NetworkGetEntityFromNetworkId(v.netId)
+            if DoesEntityExist(entity) then
+                if playersCount > 0 then
+                    TriggerClientEvent('esx_lscustom:restoreMods', -1, v.netId, v.props)
+                else
+                    DeleteEntity(entity)
+                end
+            end
+        end
+        Customs[src] = nil
+    end
 end)
 
-RegisterServerEvent('esx_lscustom:buyMod')
-AddEventHandler('esx_lscustom:buyMod', function(price)
+RegisterNetEvent('esx_lscustom:buyMod', function(price)
 	local source = source
 	local xPlayer = ESX.GetPlayerFromId(source)
 	price = tonumber(price)
+
+  if not xPlayer then return print('^3[WARNING]^0 The player could\'nt be found.') end
 
 	if Config.IsMechanicJobOnly then
 		local societyAccount
@@ -69,10 +70,16 @@ AddEventHandler('esx_lscustom:buyMod', function(price)
 	end
 end)
 
-RegisterServerEvent('esx_lscustom:refreshOwnedVehicle')
-AddEventHandler('esx_lscustom:refreshOwnedVehicle', function(vehicleProps, netId)
+RegisterNetEvent('esx_lscustom:refreshOwnedVehicle', function(vehicleProps, netId)
 	local src = tostring(source)
 	local xPlayer = ESX.GetPlayerFromId(source)
+
+  if not vehicleProps then return print('^3[WARNING]^0 The vehicle Props could\'nt be found.') end
+  if not vehicleProps.plate then return print('^3[WARNING]^0 The vehicle plate could\'nt be found.') end
+  if not vehicleProps.model then return print('^3[WARNING]^0 The vehicle model could\'nt be found.') end
+
+  if not xPlayer then return print('^3[WARNING]^0 The player could\'nt be found.') end
+
 	MySQL.single('SELECT vehicle FROM owned_vehicles WHERE plate = ?', {vehicleProps.plate},
 	function(result)
 		if result then

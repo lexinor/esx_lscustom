@@ -3,10 +3,13 @@ local lsMenuIsShowed, HintDisplayed, isInLSMarker = false, false, false
 local Blips = {}
 
 RegisterNetEvent('esx:playerLoaded')
-AddEventHandler('esx:playerLoaded', function()
+AddEventHandler('esx:playerLoaded', function(xPlayer, isNew, skin)
     ESX.TriggerServerCallback('esx_lscustom:getVehiclesPrices', function(vehicles)
         Vehicles = vehicles
     end)
+    if xPlayer.job.name == "mechanic" then
+        CreateBlips()
+    end
 end)
 
 if Config.IsMechanicJobOnly then

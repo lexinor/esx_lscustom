@@ -1,5 +1,6 @@
 local Vehicles, myCar = {}, {}
 local lsMenuIsShowed, HintDisplayed, isInLSMarker = false, false, false
+local Blips = {}
 
 RegisterNetEvent('esx:playerLoaded')
 AddEventHandler('esx:playerLoaded', function()
@@ -7,6 +8,19 @@ AddEventHandler('esx:playerLoaded', function()
         Vehicles = vehicles
     end)
 end)
+
+if Config.IsMechanicJobOnly then
+    RegisterNetEvent('esx:setJob', function(job)
+        if job.name == "mechanic" then
+            ClearBlips()
+            CreateBlips()
+        else
+            ClearBlips()
+        end
+    end)
+else
+    CreateBlips()
+end
 
 RegisterNetEvent('esx_lscustom:installMod')
 AddEventHandler('esx_lscustom:installMod', function()
@@ -493,20 +507,32 @@ function GetAction(data)
     OpenLSMenu(elements, menuName, menuTitle, parent)
 end
 
--- Blips
-CreateThread(function()
-    for k, v in pairs(Config.Zones) do
-        local blip = AddBlipForCoord(v.Pos.x, v.Pos.y, v.Pos.z)
+function CreateBlips()
+    -- Blips
+    CreateThread(function()
+        for k, v in pairs(Config.Zones) do
+            local blip = AddBlipForCoord(v.Pos.x, v.Pos.y, v.Pos.z)
 
-        SetBlipSprite(blip, 72)
-        SetBlipScale(blip, 0.8)
-        SetBlipAsShortRange(blip, true)
+            SetBlipSprite(blip, 72)
+            SetBlipScale(blip, 0.8)
+            SetBlipAsShortRange(blip, true)
 
-        BeginTextCommandSetBlipName('STRING')
-        AddTextComponentSubstringPlayerName(v.Name)
-        EndTextCommandSetBlipName(blip)
+            BeginTextCommandSetBlipName('STRING')
+            AddTextComponentSubstringPlayerName(v.Name)
+            EndTextCommandSetBlipName(blip)
+
+            Blips[#Blips+1] = blip
+        end
+    end)
+end
+
+function ClearBlips()
+    if #(Blips) then
+        for k, blip in pairs(Blips) do
+            RemoveBlip(blip)
+        end
     end
-end)
+end
 
 -- Activate menu when player is inside marker
 CreateThread(function()
